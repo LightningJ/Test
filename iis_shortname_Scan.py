@@ -67,13 +67,14 @@ class Scanner():
     def run(self):
         for c in self.alphanum:
             self.queue.put( (self.path + c, '.*') )    # filename, extension
-        for i in range(20):
-            t = threading.Thread(target=self._scan_worker)
-            self.threads.append(t)
-            t.start()
-        for t in self.threads:
-            t.join()
-        self.STOP_ME = True
+        # for i in range(20):
+        #     t = threading.Thread(target=self._scan_worker)
+        #     self.threads.append(t)
+        #     t.start()
+        # for t in self.threads:
+        #     t.join()
+        # self.STOP_ME = True
+        self._scan_worker()
 
     def report(self):
         print '-'* 64
